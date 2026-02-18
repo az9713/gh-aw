@@ -9,6 +9,12 @@ Here are some pointers to get you started in using this tool.
 
 -->
 
+> **This is a clone of the original [`gh-aw`](https://github.com/github/gh-aw) repository by GitHub.**
+> The original project lives at **https://github.com/github/gh-aw** — go there for the latest version, issues, and contributions.
+> This fork adds a detailed [Use Cases Guide](docs/USE_CASES.md) with 25 copy-paste-ready workflow examples and beginner-friendly setup instructions.
+
+---
+
 # GitHub Agentic Workflows (gh-aw)
 
 Write agentic workflows in natural language markdown, and run them as GitHub Actions.
