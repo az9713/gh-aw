@@ -14,7 +14,7 @@ require (
 	github.com/goccy/go-yaml v1.19.2
 	github.com/google/jsonschema-go v0.4.2
 	github.com/modelcontextprotocol/go-sdk v1.3.0
-	github.com/rhysd/actionlint v1.7.10
+	github.com/rhysd/actionlint v1.7.11
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 	github.com/securego/gosec/v2 v2.22.11
 	github.com/sourcegraph/conc v0.3.0
@@ -36,7 +36,7 @@ require (
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymanbagabas/go-udiff v0.3.1 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
 	github.com/catppuccin/go v0.3.0 // indirect
 	github.com/ccojocar/zxcvbn-go v1.0.4 // indirect
 	github.com/charmbracelet/colorprofile v0.4.1 // indirect
