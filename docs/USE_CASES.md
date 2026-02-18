@@ -163,8 +163,7 @@ Skip ahead to [Step 7](#step-7-initialize-gh-aw-in-your-repository).
 
 #### Option B: Build and Install from Local Source Code
 
-If you already have a local clone of the gh-aw repository (for example, at
-`C:\Users\you\Downloads\gh-aw-main` or `~/gh-aw-main`), you can build and
+If you already have a local clone of the gh-aw repository, you can build and
 install it locally instead of downloading from GitHub. This is useful if you want
 to use a modified or development version.
 
@@ -201,8 +200,7 @@ go version
 Open a terminal and navigate to your local gh-aw source code folder:
 
 ```bash
-cd C:\Users\you\Downloads\gh-aw-main    # Windows — use your actual path
-# cd ~/gh-aw-main                        # macOS/Linux — use your actual path
+cd path/to/gh-aw
 ```
 
 Build the binary:
@@ -249,11 +247,8 @@ gh aw --help
 Navigate to the repository where you want to use gh-aw workflows. This is the
 target project — **not** the gh-aw source code folder.
 
-For example, if your project is at `C:\Users\you\Downloads\my-project`:
-
 ```bash
-cd C:\Users\you\Downloads\my-project     # Windows — use your actual path
-# cd ~/my-project                         # macOS/Linux — use your actual path
+cd path/to/your-project
 ```
 
 Then initialize gh-aw:
