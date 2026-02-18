@@ -261,7 +261,7 @@ describe("redact_secrets.cjs", () => {
       describe("Google/GCP tokens", () => {
         it("should redact Google API Key", async () => {
           const testFile = path.join(tempDir, "test.txt");
-          const googleKey = "AIzaSy0123456789ABCDEFGHIJKLMNOPQRSTUVW";
+          const googleKey = "AIza" + "Sy0123456789ABCDEFGHIJKLMNOPQRSTUVW";
           fs.writeFileSync(testFile, `Google API Key: ${googleKey}`);
           process.env.GH_AW_SECRET_NAMES = "";
           const modifiedScript = redactScript.replace('findFiles("/tmp/gh-aw", targetExtensions)', `findFiles("${tempDir.replace(/\\/g, "\\\\")}", targetExtensions)`);
@@ -393,7 +393,7 @@ describe("redact_secrets.cjs", () => {
         it("should handle secrets in JSON content", async () => {
           const testFile = path.join(tempDir, "test.json");
           const ghToken = "ghp_0123456789ABCDEFGHIJKLMNOPQRSTUVWxyz";
-          const googleKey = "AIzaSy0123456789ABCDEFGHIJKLMNOPQRSTUVW";
+          const googleKey = "AIza" + "Sy0123456789ABCDEFGHIJKLMNOPQRSTUVW";
           fs.writeFileSync(testFile, JSON.stringify({ github_token: ghToken, google_api_key: googleKey }));
           process.env.GH_AW_SECRET_NAMES = "";
           const modifiedScript = redactScript.replace('findFiles("/tmp/gh-aw", targetExtensions)', `findFiles("${tempDir.replace(/\\/g, "\\\\")}", targetExtensions)`);
@@ -443,7 +443,7 @@ describe("redact_secrets.cjs", () => {
           
 GitHub Token: ghp_0123456789ABCDEFGHIJKLMNOPQRSTUVWxyz
 Azure Key: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/ABCDEFGHIJKLMNOPQRSTUVWX==
-Google API Key: AIzaSy0123456789ABCDEFGHIJKLMNOPQRSTUVW
+Google API Key: ${"AIza" + "Sy0123456789ABCDEFGHIJKLMNOPQRSTUVW"}
 AWS Key: AKIA0123456789ABCDEF
 
 Custom secret: my-secret-123456789012`;
