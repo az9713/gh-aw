@@ -231,6 +231,7 @@ you through creating real workflows from scratch, including:
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributors | Contribution process and guidelines |
 | [DEVGUIDE.md](DEVGUIDE.md) | Developers | Detailed development reference |
 | [Workflow Incident Report](docs/WORKFLOW_INCIDENT_REPORT.md) | Users | Why cloned workflows fail and how to fix them |
+| [CI/CD Tutorial](docs/CI_CD_TUTORIAL.md) | Beginners | Complete guide to CI/CD and GitHub Actions with real examples |
 
 ## Guardrails and Security
 
