@@ -230,6 +230,7 @@ you through creating real workflows from scratch, including:
 | [CLAUDE.md](CLAUDE.md) | AI Agents | Machine-readable project context |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributors | Contribution process and guidelines |
 | [DEVGUIDE.md](DEVGUIDE.md) | Developers | Detailed development reference |
+| [Workflow Incident Report](docs/WORKFLOW_INCIDENT_REPORT.md) | Users | Why cloned workflows fail and how to fix them |
 
 ## Guardrails and Security
 
