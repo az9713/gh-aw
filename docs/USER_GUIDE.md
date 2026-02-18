@@ -5,6 +5,7 @@ A step-by-step guide with 10 hands-on tutorials to get you started with
 
 ## Table of Contents
 
+- [Why Markdown? Why gh-aw?](#why-markdown-why-gh-aw)
 - [Before You Start](#before-you-start)
 - [Understanding the Basics](#understanding-the-basics)
 - [Tutorial 1: Hello World Workflow](#tutorial-1-hello-world-workflow)
@@ -19,6 +20,223 @@ A step-by-step guide with 10 hands-on tutorials to get you started with
 - [Tutorial 10: Multi-Tool Workflow](#tutorial-10-multi-tool-workflow)
 - [Common Commands Reference](#common-commands-reference)
 - [Troubleshooting](#troubleshooting)
+
+---
+
+## Why Markdown? Why gh-aw?
+
+If you've seen regular GitHub Actions workflows (the `.yml` files in
+`.github/workflows/`), you might wonder: **why does gh-aw use markdown files
+instead? And why can't I just write the YAML myself?**
+
+These are the right questions. This section answers them.
+
+### The Short Answer
+
+gh-aw workflows are **not** regular GitHub Actions workflows. They are
+instructions for **AI agents** -- programs that use artificial intelligence to
+read, think, and act on your repository. Writing the YAML for an AI agent
+workflow by hand would be like writing machine code instead of Python: technically
+possible, but impractical, error-prone, and unnecessary.
+
+### What You Write vs. What gh-aw Produces
+
+Here is a real workflow from the gh-aw project itself. The developer writes this
+markdown file (simplified for clarity):
+
+```markdown
+---
+name: Auto-Triage Issues
+on:
+  issues:
+    types: [opened, edited]
+  schedule: every 6h
+engine: copilot
+tools:
+  github:
+    toolsets: [issues]
+safe-outputs:
+  add-labels:
+    max: 10
+  create-discussion:
+    category: "audits"
+    max: 1
+---
+
+# Auto-Triage Issues Agent
+
+You are the Auto-Triage Issues Agent. Automatically categorize
+and label GitHub issues to improve discoverability.
+
+When an issue is opened or edited, classify it based on its
+title and body. Apply labels like "bug", "enhancement",
+"documentation", or "question". If uncertain, add "needs-triage".
+```
+
+That is about **40 lines of simple config** plus **plain English instructions**.
+
+When you run `gh aw compile`, it produces a `.lock.yml` file that is over
+**1,100 lines** of GitHub Actions YAML. That compiled file contains:
+
+```
++------------------------------------------------------------------+
+|  6 JOBS generated automatically:                                  |
+|                                                                   |
+|  1. pre_activation                                                |
+|     - Checks if the user has permission to trigger this workflow  |
+|     - Enforces rate limiting (max 5 runs per 60 minutes)          |
+|     - Validates team membership                                   |
+|                                                                   |
+|  2. activation                                                    |
+|     - Verifies the workflow file hasn't been tampered with        |
+|     - Checks file timestamps                                     |
+|                                                                   |
+|  3. agent                                                         |
+|     - Sets up an isolated sandbox with a network firewall         |
+|     - Downloads and starts Docker containers                      |
+|     - Configures MCP (Model Context Protocol) servers             |
+|     - Starts a secure MCP gateway with API key authentication     |
+|     - Validates the COPILOT_GITHUB_TOKEN secret                   |
+|     - Installs the Copilot CLI                                    |
+|     - Builds the AI prompt from your markdown instructions        |
+|     - Substitutes runtime variables (issue number, actor, etc.)   |
+|     - Executes the AI agent inside the firewall sandbox           |
+|     - Collects and sanitizes the agent's output                   |
+|     - Redacts secrets from all log files                          |
+|     - Uploads artifacts for debugging                             |
+|                                                                   |
+|  4. detection                                                     |
+|     - Runs a SECOND AI agent to check if the first agent's        |
+|       output is safe (threat detection)                           |
+|     - Blocks unsafe outputs from being applied                    |
+|                                                                   |
+|  5. safe_outputs                                                  |
+|     - Only runs if threat detection passes                        |
+|     - Processes the agent's output through sanitized handlers     |
+|     - Validates each label operation against configured limits    |
+|     - Actually applies the labels to GitHub issues                |
+|     - Creates discussion reports with enforced title prefixes     |
+|                                                                   |
+|  6. conclusion                                                    |
+|     - Reports success or failure                                  |
+|     - Handles agent failures gracefully                           |
+|     - Records missing tool reports for debugging                  |
++------------------------------------------------------------------+
+```
+
+You would need to write and maintain all of that yourself.
+
+### What Does gh-aw Actually Do?
+
+gh-aw is **not** just a markdown-to-YAML translator. It is a complete platform
+for building, running, and monitoring AI agent workflows. Here is everything it
+handles:
+
+#### 1. Compilation (the .md to .yml translation)
+
+This is the most visible feature. When you run `gh aw compile`, gh-aw:
+
+- **Parses** your markdown frontmatter and validates it against a JSON schema
+- **Resolves imports** -- workflows can inherit configuration from shared files
+  (like `imports: [shared/mood.md]`), and gh-aw merges them using breadth-first
+  search
+- **Selects the AI engine** -- different engines (Copilot, Claude, Codex) need
+  completely different setup steps, Docker images, and authentication flows.
+  gh-aw abstracts all of this behind `engine: copilot`
+- **Generates safe-output handlers** -- each write operation (create issue, add
+  labels, post comment) gets its own validation schema, rate limits, and
+  sanitization rules
+- **Configures the network firewall** -- restricts which domains the AI agent
+  can access, preventing data exfiltration
+- **Sets up MCP servers** -- the Model Context Protocol is how AI agents access
+  tools. gh-aw configures a gateway that routes tool calls through a secure proxy
+- **Adds threat detection** -- a second AI agent that reviews the first agent's
+  output before it's applied
+- **Pins all dependencies** -- every GitHub Action is referenced by its SHA hash,
+  not a version tag, to prevent supply chain attacks
+- **Validates everything** -- 60+ validation rules catch errors at compile time
+  instead of at runtime on GitHub's servers
+
+#### 2. Security (what you cannot do yourself easily)
+
+The security system is the main reason gh-aw exists. Writing secure AI agent
+workflows by hand is extremely difficult because:
+
+- **AI agents can be tricked.** A malicious issue title could instruct the AI to
+  delete other issues, leak secrets, or modify code. gh-aw's safe-output system
+  ensures the AI can only take the specific actions you configured, with enforced
+  limits
+- **Secrets must be protected.** gh-aw automatically redacts secrets from all log
+  files, validates that required secrets exist before running, and masks them in
+  GitHub Actions output
+- **Network access must be restricted.** Without a firewall, an AI agent could
+  send your repository data to any server on the internet. gh-aw runs agents
+  inside a Docker-based firewall with explicit domain allowlists
+- **Permission escalation must be prevented.** If you configure `add-labels`
+  with `max: 10`, the AI cannot add 11 labels or create issues instead. Each
+  safe-output type has its own validation, sanitization, and rate limiting
+- **Expressions can be injected.** GitHub Actions expressions like
+  `${{ github.event.issue.title }}` are evaluated before your code runs. A
+  specially crafted issue title could inject arbitrary commands. gh-aw's
+  expression safety checks prevent this
+
+#### 3. Full CLI Toolset (not just compilation)
+
+gh-aw provides commands for the entire workflow lifecycle:
+
+| Command | What It Does |
+|---------|-------------|
+| `gh aw init` | Initialize gh-aw in your repository (creates config files, sets up `.gitattributes`) |
+| `gh aw new` | Create a new workflow from a template |
+| `gh aw compile` | Compile `.md` to `.lock.yml` (with `--watch` mode for auto-compile) |
+| `gh aw run` | Execute a workflow directly (for testing before pushing) |
+| `gh aw logs` | Download and analyze workflow execution logs (duration, cost, token usage) |
+| `gh aw audit` | Deep-dive into a single workflow run (error detection, MCP tool usage stats) |
+| `gh aw health` | Check repository health (validates all workflow configs) |
+| `gh aw status` | Show compilation status of all workflows |
+| `gh aw secrets` | Manage workflow secrets interactively |
+| `gh aw fix` | Auto-fix common compilation errors |
+| `gh aw upgrade` | Upgrade gh-aw to the latest version |
+| `gh aw mcp` | Manage MCP servers (add, list, inspect) |
+| `gh aw trial` | Run a workflow in trial mode on a test issue |
+| `gh aw enable/disable` | Toggle workflow triggers on or off |
+
+#### 4. Runtime Infrastructure (what runs on GitHub's servers)
+
+When a compiled workflow executes on GitHub Actions, gh-aw's generated code
+provides infrastructure that does not exist in regular workflows:
+
+- **Activation gates** -- permission checks, rate limiting, and team membership
+  validation run before the AI agent starts
+- **MCP gateway** -- a Docker-based proxy that routes AI tool calls to their
+  destinations (GitHub API, safe-output handlers) with authentication and logging
+- **Agent sandbox** -- the AI runs inside a firewall container that blocks
+  unauthorized network access
+- **Safe-output processing** -- agent output is collected as structured JSONL,
+  validated against schemas, threat-checked, and only then applied to GitHub
+- **Artifact collection** -- prompts, logs, firewall records, and agent
+  conversations are uploaded as workflow artifacts for debugging
+
+### Why Not Just Write YAML?
+
+To summarize the answer in one table:
+
+| What You'd Have to Do Yourself | What gh-aw Does for You |
+|-------------------------------|------------------------|
+| Write 1,100+ lines of YAML per workflow | Write ~40 lines of config + plain English |
+| Manually configure Docker containers, MCP servers, and firewalls | One line: `engine: copilot` |
+| Build your own safe-output validation and sanitization | Declare: `safe-outputs: add-labels: { max: 10 }` |
+| Implement rate limiting, permission checks, team membership gates | Declare: `rate-limit: { max: 5, window: 60 }` |
+| Pin every action SHA manually and keep them updated | Automatic SHA pinning at compile time |
+| Write threat detection to review AI output before applying | Built-in, automatic |
+| Debug by reading raw GitHub Actions logs | `gh aw logs`, `gh aw audit` with parsed metrics |
+| Know the differences between Copilot, Claude, and Codex setup | Change one word: `engine: claude` |
+| Redact secrets from logs yourself | Automatic at every step |
+| Validate workflow config by deploying and watching it fail | Compile-time validation with 60+ rules |
+
+**The markdown file is not a limitation. It is the point.** You write what you
+want in plain language, and gh-aw handles everything else -- the security, the
+infrastructure, the plumbing, and the guardrails.
 
 ---
 

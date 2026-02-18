@@ -11,7 +11,10 @@ Here are some pointers to get you started in using this tool.
 
 > **This is a clone of the original [`gh-aw`](https://github.com/github/gh-aw) repository by GitHub.**
 > The original project lives at **https://github.com/github/gh-aw** — go there for the latest version, issues, and contributions.
-> This fork adds a detailed [Use Cases Guide](docs/USE_CASES.md) with 25 copy-paste-ready workflow examples and beginner-friendly setup instructions.
+> This fork adds beginner-friendly documentation:
+> - **[Why Markdown? Why gh-aw?](docs/USER_GUIDE.md#why-markdown-why-gh-aw)** — Explains what gh-aw actually does, why it uses markdown instead of YAML, and what 40 lines of config compiles into (1,100+ lines of secure infrastructure)
+> - **[CI/CD Tutorial](docs/CI_CD_TUTORIAL.md)** — A comprehensive 17-part guide to CI/CD and GitHub Actions using real-world workflows as examples, from zero experience to production-ready
+> - **[Use Cases Guide](docs/USE_CASES.md)** — 25 copy-paste-ready workflow examples
 
 ---
 
@@ -224,14 +227,14 @@ you through creating real workflows from scratch, including:
 
 | Document | Audience | Description |
 |----------|----------|-------------|
-| [User Guide](docs/USER_GUIDE.md) | Users | Step-by-step tutorials with 10 use cases |
+| [User Guide](docs/USER_GUIDE.md) | Users | Why gh-aw exists, what it does, and 10 hands-on tutorials |
 | [Architecture Guide](docs/ARCHITECTURE.md) | Developers | System design with ASCII diagrams |
 | [Developer Guide](docs/DEVELOPER_GUIDE.md) | Developers | Setup, build, test, and contribute |
 | [CLAUDE.md](CLAUDE.md) | AI Agents | Machine-readable project context |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributors | Contribution process and guidelines |
 | [DEVGUIDE.md](DEVGUIDE.md) | Developers | Detailed development reference |
 | [Workflow Incident Report](docs/WORKFLOW_INCIDENT_REPORT.md) | Users | Why cloned workflows fail and how to fix them |
-| [CI/CD Tutorial](docs/CI_CD_TUTORIAL.md) | Beginners | Complete guide to CI/CD and GitHub Actions with real examples |
+| [CI/CD Tutorial](docs/CI_CD_TUTORIAL.md) | Beginners | 17-part guide to CI/CD and GitHub Actions with real-world workflow examples |
 
 ## Guardrails and Security
 
