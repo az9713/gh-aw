@@ -141,6 +141,14 @@ your repository name.
 
 ### Step 6: Install gh-aw
 
+You have two options: install the published release from GitHub, or build and
+install from a local copy of the source code. Pick whichever applies to you.
+
+#### Option A: Install from GitHub (Easiest)
+
+If you do not have the gh-aw source code on your computer, install the published
+extension directly:
+
 ```bash
 gh extension install github/gh-aw
 ```
@@ -151,13 +159,110 @@ gh aw --help
 # You should see a help message listing commands like compile, init, new, etc.
 ```
 
+Skip ahead to [Step 7](#step-7-initialize-gh-aw-in-your-repository).
+
+#### Option B: Build and Install from Local Source Code
+
+If you already have a local clone of the gh-aw repository (for example, at
+`C:\Users\you\Downloads\gh-aw-main` or `~/gh-aw-main`), you can build and
+install it locally instead of downloading from GitHub. This is useful if you want
+to use a modified or development version.
+
+##### B1. Install the Go Programming Language
+
+gh-aw is written in Go. You need Go installed to build it from source.
+
+**Windows:**
+```bash
+winget install GoLang.Go
+```
+
+**macOS:**
+```bash
+brew install go
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt install golang
+```
+
+**After installing, close and reopen your terminal** so the `go` command is
+available in your PATH.
+
+**Verify Go is installed:**
+```bash
+go version
+# Should show something like: go version go1.24.x windows/amd64
+```
+
+##### B2. Build the gh-aw Binary
+
+Open a terminal and navigate to your local gh-aw source code folder:
+
+```bash
+cd C:\Users\you\Downloads\gh-aw-main    # Windows — use your actual path
+# cd ~/gh-aw-main                        # macOS/Linux — use your actual path
+```
+
+Build the binary:
+
+```bash
+go build -o gh-aw.exe ./cmd/gh-aw       # Windows
+# go build -o gh-aw ./cmd/gh-aw          # macOS/Linux
+```
+
+This compiles the source code and creates a `gh-aw.exe` (or `gh-aw`) file in
+the current folder.
+
+**Verify the build succeeded:**
+```bash
+./gh-aw --help                            # macOS/Linux
+# .\gh-aw.exe --help                      # Windows (PowerShell)
+# ./gh-aw.exe --help                      # Windows (Git Bash)
+# You should see a help message listing commands like compile, init, new, etc.
+```
+
+##### B3. Install as a Local gh Extension
+
+Still inside the gh-aw source folder, run:
+
+```bash
+gh extension install .
+```
+
+The `.` (dot) means "install from the current directory." This creates a symbolic
+link so that `gh aw` commands use your locally built binary.
+
+**Verify it is installed:**
+```bash
+gh aw --help
+# Should show the same help message — but now it is running your local build
+```
+
+> **Tip:** If you later make changes to the gh-aw source code and rebuild
+> (`go build -o gh-aw.exe ./cmd/gh-aw`), the `gh aw` command will automatically
+> pick up the new binary because it is linked to your local folder.
+
 ### Step 7: Initialize gh-aw in Your Repository
 
-This creates the necessary configuration files inside your repo.
+Navigate to the repository where you want to use gh-aw workflows. This is the
+target project — **not** the gh-aw source code folder.
+
+For example, if your project is at `C:\Users\you\Downloads\my-project`:
+
+```bash
+cd C:\Users\you\Downloads\my-project     # Windows — use your actual path
+# cd ~/my-project                         # macOS/Linux — use your actual path
+```
+
+Then initialize gh-aw:
 
 ```bash
 gh aw init
 ```
+
+This creates the necessary configuration files inside your repo.
 
 You are now ready to use any of the use cases below.
 

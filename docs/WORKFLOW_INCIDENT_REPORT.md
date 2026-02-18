@@ -273,11 +273,31 @@ You should see: `Logged in to github.com as YOUR_USERNAME`.
 
 #### 1d. Install the gh-aw Extension
 
+You have two options:
+
+**Option A — Install from GitHub (easiest):**
 ```bash
 gh extension install github/gh-aw
 ```
 
-**Verify it works:**
+**Option B — Build and install from local source code:**
+
+If you have a local clone of the gh-aw repository, you can build and install it
+locally. This requires the [Go programming language](https://go.dev/dl/) to be
+installed first. For full step-by-step instructions on building from source, see
+the [Use Cases Guide — Step 6, Option B](USE_CASES.md#step-6-install-gh-aw).
+
+Quick version:
+```bash
+# Install Go (Windows: winget install GoLang.Go / macOS: brew install go)
+# Then:
+cd /path/to/your/gh-aw-source
+go build -o gh-aw.exe ./cmd/gh-aw    # Windows
+# go build -o gh-aw ./cmd/gh-aw      # macOS/Linux
+gh extension install .
+```
+
+**Verify it works (either option):**
 ```bash
 gh aw --help
 ```
