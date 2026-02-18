@@ -2867,20 +2867,109 @@ You do **not** get:
 
 The original `github/gh-aw` repository is maintained by GitHub's internal team.
 Their workflows depend on infrastructure that only exists in their GitHub
-organization:
+organization.
 
-| What Was Missing | What It Caused |
-|-----------------|---------------|
-| `COPILOT_API_TOKEN` secret | AI agent workflows could not authenticate with Copilot |
-| `CLAUDE_API_KEY` secret | Claude engine workflows could not authenticate with Anthropic |
-| `GH_APP_PRIVATE_KEY` secret | GitHub App workflows could not sign API requests |
-| GitHub Environments (staging, production) | Deployment workflows failed at the environment check |
-| Internal runner labels | Some workflows could not find a runner to execute on |
-| Organization-level permissions | Workflows referencing org-level teams/configs failed |
+To understand why these specific secrets exist, you need to understand what
+`gh-aw` does: it compiles markdown instructions into GitHub Actions workflows
+that **run AI agents**. These AI agents are not built into GitHub -- they are
+external services that require authentication. Each AI service has its own
+API, and each API requires a secret key to prove you have permission to use it.
 
-Every workflow that tried to use `${{ secrets.SOME_SECRET }}` received an
-**empty string** instead of the actual secret value, causing authentication
-errors, API failures, and crashes.
+Think of it like this: the workflow file is a recipe, and the AI service is the
+kitchen. The recipe tells the kitchen what to cook, but you need a **key to
+get into the kitchen**. That key is the API token. Without it, the recipe
+(workflow) is useless.
+
+Here are the specific secrets that were missing and why each one exists:
+
+#### `COPILOT_API_TOKEN` -- Why GitHub Copilot Needs a Token
+
+GitHub Copilot is an AI coding assistant. When a gh-aw workflow uses
+`engine: copilot`, it tells the compiled workflow to send the markdown
+instructions to Copilot's AI service. Copilot reads the instructions, uses
+the configured tools (like reading issues, creating labels, posting comments),
+and performs the task.
+
+**Why a token is needed:** Even though Copilot is a GitHub product, it is a
+**paid service** with its own API. GitHub needs to know who is making the
+request and whether they have an active Copilot subscription. The
+`COPILOT_API_TOKEN` proves to GitHub's Copilot API that the workflow is
+authorized to use Copilot on behalf of a paying user.
+
+Without this token, the workflow sends a request to Copilot's API, Copilot
+responds with "who are you? I don't recognize this request," and the workflow
+fails with an authentication error.
+
+#### `CLAUDE_API_KEY` -- Why Anthropic Claude Needs a Key
+
+Some gh-aw workflows use `engine: claude`, which means they send instructions
+to Anthropic's Claude AI instead of GitHub Copilot. Claude is a completely
+separate company from GitHub, with its own API and its own billing.
+
+**Why a key is needed:** When the workflow sends instructions to
+`api.anthropic.com`, Anthropic needs to know: (1) who is making the request,
+(2) whether they have an account, and (3) which account to bill for the API
+usage. The `CLAUDE_API_KEY` (also called `ANTHROPIC_API_KEY`) is a unique
+string that identifies your Anthropic account. Every API call costs money,
+and this key links the usage to your billing account.
+
+Without this key, Anthropic's API returns "unauthorized" and the workflow
+fails immediately.
+
+#### `GH_APP_PRIVATE_KEY` -- Why a GitHub App Key Exists
+
+This one is different from the AI tokens. A **GitHub App** is a special type
+of integration that can act on a repository with its own identity (instead of
+acting as a specific user). The original `github/gh-aw` repository has a
+GitHub App installed that some workflows use for elevated permissions.
+
+**Why a private key is needed:** GitHub Apps authenticate using a
+public/private key pair. The private key is used to sign a short-lived
+JSON Web Token (JWT), which the App exchanges for an installation access
+token. This token has specific permissions defined when the App was installed
+(e.g., create issues, merge PRs, push code).
+
+**Why use an App instead of a regular token?** Two reasons:
+1. **Higher rate limits** -- GitHub Apps get 5,000 API requests per hour per
+   installation, while user tokens get 5,000 per hour total across all repos.
+2. **Scoped permissions** -- An App token can have exactly the permissions it
+   needs and nothing more, which is more secure than a user token that inherits
+   all the user's permissions.
+
+Without this key, the workflow cannot generate the JWT, cannot get an
+installation token, and any API call that requires App-level authentication
+fails.
+
+#### Other Missing Infrastructure
+
+Beyond the AI and authentication tokens, these were also missing:
+
+| What Was Missing | Why It Exists | What Happened Without It |
+|-----------------|--------------|--------------------------|
+| **GitHub Environments** (staging, production) | Environments provide deployment protection rules -- e.g., "require manager approval before deploying to production." They can also hold environment-specific secrets. | Workflows that reference an environment immediately fail because the environment does not exist on the clone. |
+| **Internal runner labels** | The original org uses custom runners (faster machines with specific software pre-installed) referenced by label names like `ubuntu-latest-16-cores`. | Workflows requesting these runners wait forever for a machine that does not exist, then time out. |
+| **Organization-level permissions** | Some workflows reference teams (`@github/engineering`) or organization-level variables that only exist in the `github` organization. | Any step that reads org-level config or checks team membership fails with a "not found" error. |
+
+#### What Happens When a Secret Is Missing
+
+When a workflow references `${{ secrets.COPILOT_API_TOKEN }}` and that secret
+does not exist in the repository, GitHub does not throw an error at that point.
+Instead, it **silently substitutes an empty string**. The workflow continues
+running, and the empty string gets passed to whatever command or API call
+expects the token.
+
+This is why the error messages can be confusing. You do not see "secret not
+found." Instead, you see errors like:
+
+- `401 Unauthorized` -- the API received an empty token and rejected it
+- `403 Forbidden` -- the API received an invalid token
+- `Error: Input required and not supplied: token` -- the action expected a
+  non-empty value
+- `Error: Process completed with exit code 1` -- a generic failure caused by
+  the authentication error upstream
+
+If you see any of these errors in a cloned repository, the first thing to
+check is whether the required secrets exist.
 
 ### The Two Types of Emails You Receive
 
