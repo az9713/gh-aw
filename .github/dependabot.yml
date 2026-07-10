@@ -4,23 +4,29 @@ updates:
   directory: /
   schedule:
     interval: weekly
+  open-pull-requests-limit: 0
 - package-ecosystem: npm
   directory: /docs
   schedule:
     interval: weekly
+  open-pull-requests-limit: 0
 - package-ecosystem: npm
   directory: /actions/setup/js
   schedule:
     interval: weekly
+  open-pull-requests-limit: 0
 - package-ecosystem: npm
   directory: /.github/workflows
   schedule:
     interval: weekly
+  open-pull-requests-limit: 0
 - package-ecosystem: pip
   directory: /.github/workflows
   schedule:
     interval: weekly
+  open-pull-requests-limit: 0
 - package-ecosystem: gomod
   directory: /.github/workflows
   schedule:
     interval: weekly
+  open-pull-requests-limit: 0
